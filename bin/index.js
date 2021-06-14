@@ -56,11 +56,15 @@ fs.readFile(yargs.argv.file, 'utf8', function(err, data) {
                 level: result.level || null,
                 message: result.message.text || null,
                 location: null,
+                line: null,
                 ruleId: result.ruleId,
             }
             if (Object.keys(result).includes('locations')) {
                 result.locations.map(location => {
                     tableRecord.location = location.physicalLocation.artifactLocation.uri;
+                    if (Object.keys(location).includes('region')) {
+                        tableRecord.line = region.startLine;
+                    }
                     results.push(tableRecord);
                 });
             } else {
