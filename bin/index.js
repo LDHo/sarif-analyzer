@@ -19,15 +19,26 @@ yargs
         type: "boolean",
         demandOption: false
     })
+    // .option("g", {
+    //     alias: "github",
+    //     describe: "Display github url",
+    //     type: "boolean",
+    //     demandOption: false
+    // })
     .help(true)
     .argv;
 
 const isDisplayVertically = yargs.argv.pretty;
+// const isGithubResult = yargs.argv.github;
 
 if (!yargs.argv.file) {
     console.error('file path provided has error');
     return;
 }
+
+function chain(obj) {
+    return obj || null;
+};
 
 function color(level) {
     switch (level) {
@@ -46,7 +57,11 @@ function color(level) {
     }
 }
 
-fs.readFile(yargs.argv.file, 'utf8', function(err, data) {
+function getGithubUrl(repository) {
+    // leave it first for now
+}
+
+fs.readFile(yargs.argv.file, 'utf8', function (err, data) {
     if (err) throw err;
     const sarifData = JSON.parse(data);
     let results = [];
@@ -59,12 +74,10 @@ fs.readFile(yargs.argv.file, 'utf8', function(err, data) {
                 line: null,
                 ruleId: result.ruleId,
             }
-            if (Object.keys(result).includes('locations')) {
+            if ('locations' in result) {
                 result.locations.map(location => {
-                    tableRecord.location = location.physicalLocation.artifactLocation.uri;
-                    if (Object.keys(location).includes('region')) {
-                        tableRecord.line = region.startLine;
-                    }
+                    tableRecord.location = chain(chain(chain(chain(location).physicalLocation).artifactLocation).uri);
+                    tableRecord.line = chain(chain(chain(chain(location).physicalLocation).region).startLine);
                     results.push(tableRecord);
                 });
             } else {
